@@ -15,25 +15,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    /* === MOBILE MENU === */
+    /* === MOBILE MENU — Floating Panel === */
     const mobileToggle = document.getElementById('mobileToggle');
     const mobileClose = document.getElementById('mobileClose');
-    const navLinks = document.getElementById('navLinks');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileBackdrop = document.getElementById('mobileBackdrop');
     const navbar = document.getElementById('navbar');
+    const mobileNavLinks = document.querySelectorAll('.mobile-menu-nav a');
+    const desktopNavLinks = document.querySelectorAll('.nav-links a');
 
     function openMobileMenu() {
-        if (!navLinks) return;
-        navLinks.classList.add('mobile-open');
+        if (!mobileMenu) return;
+        mobileMenu.classList.add('open');
+        mobileMenu.setAttribute('aria-hidden', 'false');
         document.body.classList.add('menu-open');
     }
 
     function closeMobileMenu() {
-        if (!navLinks) return;
-        navLinks.classList.remove('mobile-open');
+        if (!mobileMenu) return;
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('menu-open');
     }
 
-    if (mobileToggle && navLinks) {
+    if (mobileToggle) {
         mobileToggle.addEventListener('click', openMobileMenu);
     }
 
@@ -41,15 +46,27 @@ document.addEventListener('DOMContentLoaded', function() {
         mobileClose.addEventListener('click', closeMobileMenu);
     }
 
-    if (navLinks) {
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
+    if (mobileBackdrop) {
+        mobileBackdrop.addEventListener('click', closeMobileMenu);
     }
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    const mobileMenuLogo = document.querySelector('.mobile-menu-logo');
+    if (mobileMenuLogo) {
+        mobileMenuLogo.addEventListener('click', closeMobileMenu);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('open')) {
+            closeMobileMenu();
+        }
+    });
 
     /* === ACTIVE NAV ON SCROLL === */
     const sections = document.querySelectorAll('section[id]');
-    const navItems = document.querySelectorAll('.nav-links a');
 
     function setActiveNav() {
         const scrollPos = window.scrollY + 120;
@@ -58,7 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const height = section.offsetHeight;
             const id = section.getAttribute('id');
             if (scrollPos >= top && scrollPos < top + height) {
-                navItems.forEach(item => {
+                const allNavLinks = [...desktopNavLinks, ...mobileNavLinks];
+                allNavLinks.forEach(item => {
                     item.classList.remove('active');
                     if (item.getAttribute('href') === '#' + id) {
                         item.classList.add('active');
@@ -135,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
             if (typeof AOS !== 'undefined') AOS.refresh();
+            if (window.innerWidth > 768) closeMobileMenu();
         }, 250);
     });
 
